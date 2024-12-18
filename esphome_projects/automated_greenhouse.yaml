@@ -1,0 +1,41 @@
+esphome:
+  name: greenhouse1
+
+esp32:
+  board: upesy_wroom
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: !secret api_password
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Greenhouse1 Fallback Hotspot"
+    password: !secret ap_password
+
+captive_portal:
+
+
+sensor:
+  - platform: dht
+    pin: GPIO16
+    temperature:
+      name: "Greenhouse Temperature"
+    humidity:
+      name: "Greenhouse Humidity"
+    update_interval: 30s
+    model: DHT22_TYPE2
+    

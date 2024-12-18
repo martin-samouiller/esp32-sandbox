@@ -1,0 +1,4 @@
+{
+    "sonarlint.pathToCompileCommands": "${workspaceFolder}/cpp_projects/continuous_read/build/compile_commands.json",
+    "idf.port": "/dev/tty.usbserial-0001"
+}

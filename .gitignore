@@ -30,3 +30,17 @@
 *.exe
 *.out
 *.app
+
+# Build directories
+**/build/
+
+
+# ESPHome secrets
+secrets.yaml
+
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
