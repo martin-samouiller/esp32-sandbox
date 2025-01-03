@@ -38,4 +38,29 @@ sensor:
       name: "Greenhouse Humidity"
     update_interval: 30s
     model: DHT22_TYPE2
-    
+  - platform: adc
+    pin: GPIO36
+    name: "Water Level"
+    update_interval: 10s
+  - platform: adc
+    pin: GPIO34
+    name: "Soil Moisture"
+    update_interval: 5s
+    unit_of_measurement: "%"
+    device_class: humidity
+    state_class: measurement
+    accuracy_decimals: 1
+    icon: mdi:water-percent
+    attenuation: auto
+    filters:
+    - sliding_window_moving_average:
+        window_size: 60
+        send_every: 60
+        send_first_at: 60
+    - calibrate_linear:
+        - 2.48 -> 0.00
+        - 0.93 -> 100.00
+    - lambda: |
+        if (x < 0) return 0; 
+        else if (x > 100) return 100;
+        else return (x);

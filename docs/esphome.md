@@ -42,7 +42,7 @@ setup the DHT22 sensor:
 esphome run automated_greenhouse.yaml
 ```
 
-[esphome home assistant](assets/images/homeassistant/esphome.png)
+![esphome home assistant](assets/images/homeassistant/esphome.png)
 
 
 
@@ -73,3 +73,100 @@ Problem:
 Switch to 
 
 model: **DHT22_TYPE2**
+
+Problem: MDNS not working on Home Assistant 
+
+Check to ping the device on my mac:
+
+```ping greenhouse1.local
+```
+
+Check to ping the device on the docker host (ubuntu server):
+
+````
+ping: greenhouse1.local: Temporary failure in name resolution
+````
+
+Installation of avahi-daemon on the docker host:
+```
+apt-get update && apt-get install -y avahi-utils
+```
+
+now on the docker host:
+```
+avahi-browse -a | grep greenhouse1
+```
+return 
+```
+eno1 IPv4 greenhouse1                                   _esphomelib._tcp     local
+```
+and 
+```
+ping greenhouse1.local
+```
+works
+
+But still not working on Home Assistant.
+
+![esphome home assistant error](assets/images/homeassistant/esphome-error.png)
+
+Check to ping the device inside the docker container: 
+
+```
+docker exec -it homeassistant ping greenhouse1.local
+```
+return 
+
+```
+ping: bad address 'greenhouse1.local'
+```
+
+Go inside the docker container:
+
+```
+docker exec -it homeassistant bash
+```
+
+I'm able to ping the device using the ip address:
+
+```
+ping 192.168.1.XXX
+```
+but not using the hostname.
+
+
+New docker-compose.yml file: (neee to add /run/dbus & )
+
+```yaml
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    volumes:
+      - ./homeassistant-data:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    ports:
+      - 8123:8123
+
+```
+
+The solution is to add /run/dbus to the docker-compose.yml file and change the network mode to host.
+
+When I changed the network mode to host in HA, I had some issues with the Traefik configuration. 
+
+**Bad Gateway**
+
+I need to remove the traefik label config in the docker-compose.yml file and create a new ha-traefik.yaml file in the traefik/dynamic/ folder.
+
+
+
+
+Sources:
+
+https://medium.com/@andrejtaneski/using-mdns-from-a-docker-container-b516a408a66b
+https://community.home-assistant.io/t/mdns-inside-ha-container/370146/2
+https://www.home-assistant.io/installation/alternative
