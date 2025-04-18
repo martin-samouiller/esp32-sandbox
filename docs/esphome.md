@@ -162,6 +162,17 @@ When I changed the network mode to host in HA, I had some issues with the Traefi
 
 I need to remove the traefik label config in the docker-compose.yml file and create a new ha-traefik.yaml file in the traefik/dynamic/ folder.
 
+# FAQ
+
+## Error Running command failed
+
+```
+ERROR Running command failed: Failed to write to target RAM (result was 01070000: Operation timed out)
+ERROR Please try running esptool.py --before default_reset --after hard_reset --baud 115200 --port /dev/cu.usbmodem552E0043571 --chip esp32c3 write_flash -z --flash_size detect 0x10000
+```
+
+Solution :
+If it is on ESP32 C3, you need to switch the usb c port (in the board there are 2 usb c port, change it)
 
 
 

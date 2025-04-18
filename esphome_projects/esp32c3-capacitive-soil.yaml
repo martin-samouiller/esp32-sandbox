@@ -1,0 +1,66 @@
+esphome:
+  name: esp32c3capacitivesoil
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: !secret api_password
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esp32C3Capacitivesoil"
+    password: !secret ap_password
+
+captive_portal:
+  
+substitutions:
+  sampling_period: 2s
+  samples: '30'
+  decimals: '1'
+
+sensor:
+  - platform: adc
+    pin: GPIO4
+    name: "Soil Surface Moisture Voltage"
+    id: soil_surface_moisture_voltage
+    update_interval: ${sampling_period}
+    state_class: measurement
+    accuracy_decimals: 3
+    attenuation: auto
+    filters:
+    - sliding_window_moving_average:
+        window_size: ${samples}
+        send_every: ${samples}
+        send_first_at: ${samples}
+  - platform: template
+    name: "Soil Surface Moisture"
+    unit_of_measurement: "%"
+    device_class: moisture
+    state_class: measurement
+    accuracy_decimals: ${decimals}
+    icon: mdi:water-percent
+    lambda: |-
+      return id(soil_surface_moisture_voltage).state;
+    filters:
+    - calibrate_linear:
+        - 2.62 -> 0.00
+        - 1.20 -> 100.00
+    - lambda: |
+        if (x < 0) return 0; 
+        else if (x > 100) return 100;
+        else return (x);
